@@ -4033,9 +4033,13 @@ pub mod insert {
             let continue_comment_token = continue_comment_tokens
                 .and_then(|tokens| comment::get_comment_token(text, tokens, current_line));
 
-            let (from, to, local_offs) = if let Some(idx) =
+            let line_end_idx = if cx.editor.config().discard_auto_indented_whitespace {
                 text.slice(line_start..pos).last_non_whitespace_char()
-            {
+            } else {
+                Some(pos)
+            };
+
+            let (from, to, local_offs) = if let Some(idx) = line_end_idx {
                 let first_trailing_whitespace_char = (line_start + idx + 1).min(pos);
                 let line = text.line(current_line);
 

@@ -342,6 +342,8 @@ pub struct Config {
     pub default_line_ending: LineEndingConfig,
     /// Whether to automatically insert a trailing line-ending on write if missing. Defaults to `true`.
     pub insert_final_newline: bool,
+    /// Whether to discard auto-inserted indentation whitespace on blank lines when entering normal mode or proceeding to another new line. Defaults to `true`.
+    pub discard_auto_indented_whitespace: bool,
     /// Enables smart tab
     pub smart_tab: Option<SmartTabConfig>,
     /// Draw border around popups.
@@ -994,6 +996,7 @@ impl Default for Config {
             workspace_lsp_roots: Vec::new(),
             default_line_ending: LineEndingConfig::default(),
             insert_final_newline: true,
+            discard_auto_indented_whitespace: true,
             smart_tab: Some(SmartTabConfig::default()),
             popup_border: PopupBorderConfig::None,
             indent_heuristic: IndentationHeuristic::default(),
@@ -2245,7 +2248,8 @@ fn try_restore_indent(doc: &mut Document, view: &mut View) {
     let pos = range.cursor(text);
     let line_end_pos = line_end_char_index(&text, range.cursor_line(text));
 
-    if inserted_a_new_blank_line(doc_changes, pos, line_end_pos) {
+    if doc.config.load().discard_auto_indented_whitespace 
+        && inserted_a_new_blank_line(doc_changes, pos, line_end_pos) {
         // Removes tailing whitespaces.
         let transaction =
             Transaction::change_by_selection(doc.text(), doc.selection(view.id), |range| {
