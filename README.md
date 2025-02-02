@@ -1,3 +1,65 @@
+### This fork exists to provide a config option for disabling automatic removal of whitespace indentation on otherwise blank lines.
+```toml
+[editor]
+discard-auto-indented-whitespace = false # default: true
+```
+Behaviour defaults to that of upstream Helix.
+
+When you open a new line wherein the cursor position is automatically indented, if you then `Esc` to normal mode
+or immediately proceed to another new line by pressing `Return`, the default behaviour is to discard the whitespace
+used for the indentation of the otherwise blank line. Setting `discard-auto-indented-whitespace` to `false` prevents
+the removal of that whitespace.
+
+When paired with `[editor.whitespace] render = "all"`, this can help some people visually follow indented lines
+vertically by giving the eye something to follow.
+
+This also allows pre-indenting lines for planning purposes or pasting text on a new line (`o`pen a new line,
+`Esc` to normal mode, and `P`aste_before) without then having to re-indent the pasted text.
+
+If you want the above behaviour but don't want your saved document polluted with unnecessary whitespace, Helix
+default behaviour is to format on save if a formatter is available, which typically removes trailing whitespace.
+
+This config option is unlikely to be accepted into Helix proper.
+See [this reply.](https://github.com/helix-editor/helix/discussions/10075#discussioncomment-8967564)
+
+#### The change does not exist in `master`!
+
+It's in the `keep_indentation` branch which is forked from Helix 25.01.1
+
+### To use:
+You'll need to have Rust/Cargo installed, along with base development packages for your distro (such as GCC).
+
+Be sure that `~/.cargo/bin` is in $PATH.
+
+Replace `~/git` with your git repo folder of choice and otherwise adapt to your setup.
+
+The `touch` lines are for initiating the config files if you've never run Helix before. Optional.
+Having no config files results in default behaviour.
+
+The symlink to the `runtime` folder is part of enabling syntax highlighting for supported languages, of which Helix
+supports a great many.
+The `hx -g` lines are for updating and building the language profiles which live in the `runtime` folder.
+
+```sh
+cd ~/git
+git clone https://github.com/raum-dellamorte/helix.git
+cd helix
+git checkout keep_indentation
+cargo install --locked --path helix-term
+mkdir -p ~/.config/helix/themes
+touch ~/git/helix/config.toml
+touch ~/git/helix/languages.toml
+ln -s ~/git/helix/runtime ~/.config/helix/
+hx -g fetch
+hx -g build
+```
+
+In order to notice any difference between this fork and vanilla Helix, ~/.config/helix/config.toml must contain:
+```toml
+[editor]
+discard-auto-indented-whitespace = false
+```
+
 <div align="center">
 
 <h1>
