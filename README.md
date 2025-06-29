@@ -31,33 +31,98 @@ You'll need to have Rust/Cargo installed, along with base development packages f
 
 Be sure that `~/.cargo/bin` is in $PATH.
 
-Replace `~/git` with your git repo folder of choice and otherwise adapt to your setup.
+Replace occurances of `~/git` with your prefered project/build folder.
 
 The `touch` lines are for initiating the config files if you've never run Helix before. Optional.
 Having no config files results in default behaviour.
 
-The symlink to the `runtime` folder is part of enabling syntax highlighting for supported languages, of which Helix
-supports a great many.
+The symlink to the `runtime` folder is part of enabling syntax highlighting for supported languages, and, 
+because Helix supports a great many, it's a chonky 1.4GB. Feel free to `mv` instead of `ln -s` if you don't 
+intend to keep the source folder ~~like a digital hoarder~~ for making your own changes to helix.
+
 The `hx -g` lines are for updating and building the language profiles which live in the `runtime` folder.
 
 ```sh
-cd ~/git
+cd ~/git # Change me if building elsewhere
 git clone https://github.com/raum-dellamorte/helix.git
 cd helix
 git checkout keep_indentation
 cargo install --locked --path helix-term
+# Add $HOME/.cargo/bin to $PATH
 mkdir -p ~/.config/helix/themes
-touch ~/git/helix/config.toml
-touch ~/git/helix/languages.toml
-ln -s ~/git/helix/runtime ~/.config/helix/
-hx -g fetch
-hx -g build
+touch ~/.config/helix/config.toml
+touch ~/.config/helix/languages.toml
+ln -s ~/git/helix/runtime ~/.config/helix/ # Change me if building elsewhere
+hx -g fetch # These last 2 steps are to ensure the grammars are up to date.
+hx -g build # Probably built already, but just in case
 ```
 
 In order to notice any difference between this fork and vanilla Helix, ~/.config/helix/config.toml must contain:
 ```toml
 [editor]
 discard-auto-indented-whitespace = false
+```
+My personal config.toml:
+```
+theme = "kanabox" # need 'kanabox.toml' in .config/helix/themes/
+
+[editor]
+line-number = "relative" # All the cool devs are doing it
+mouse = false # keeps the cursor from following the mouse
+bufferline = "multiple" # Hide the bufferline when only one buffer/file is open
+auto-format = false # For the demanding control freak, I will format the document myself, thank you.
+soft-wrap.enable = true
+discard-auto-indented-whitespace = false # The reason for the fork!
+
+[editor.cursor-shape]
+insert = "bar" # to make it more visually obvious when you're in 'insert' mode
+
+[editor.whitespace] # pairs well with 'discard-auto-indented-whitespace = false'
+render = "all"      # helps me to vertically track indentation with my stupid eyes
+
+[keys.normal] # I 
+esc = ["collapse_selection", "keep_primary_selection"]
+p = ["paste_before","move_char_right"] # paste at left side of cursor by default
+P = "paste_after"
+C-v = ["paste_clipboard_before","move_char_right"] # Ctrl-v paste from system clipboard
+C-c = "yank_to_clipboard" # Ctrl-c copy to system clipboard
+C-s = ":w!" # Ctrl-s save like nano and other editors
+C-x = ":q!" # Ctrl-x close like nano. Breaks Ctrl-xcv cut copy paste but I think 'close' before I think 'cut' for Ctrl-x bc nano
+C-S-s = "save_selection" # this is the default behaviour of C-s above. I _think_ reassigning is necessary to make the above work
+A-d = "delete_selection" # I _think_ this has to be declared first to make the following work
+d = "delete_selection_noyank" # I just want to delete stuff without it replacing what I deliberately yanked.
+A-c = "change_selection" # same as A-d
+c = "change_selection_noyank" # it never felt intuitive for 'change_selection' to replace what I deliberately yanked.
+"ret" = ["open_below", "normal_mode"] # I'm still test driving this, you may hate it, idk
+"*" = ["move_char_right", "move_prev_word_start", "move_next_word_end", "search_selection", "search_next"] # vim like search word under cursor
+"#" = ["move_char_right", "move_prev_word_start", "move_next_word_end", "search_selection", "search_prev"] # and reverse
+
+[keys.insert]
+C-s = ["normal_mode", ":w!"]
+C-v = ["paste_clipboard_before","move_char_right"]
+C-c = "yank_to_clipboard"
+C-x = ["yank_to_clipboard","delete_selection_noyank"]
+"ret" = "normal_mode" # pressing 'enter' returns to normal mode. takes some getting used to but I reach for the escape key less often
+"S-ret" = "insert_newline" # paired with above. similar to using 'shift-enter' to get a newline when in a text entry field that defaults to submitting on 'enter'
+"S-left" = "extend_char_left" # these 4 are to accommodate my expectation of being able to select text by holding shift in insert mode. there are issues by I can't remember them atm 
+"S-right" = "extend_char_right"
+"S-up" = "extend_visual_line_up"
+"S-down" = "extend_visual_line_down"
+"A-w" = ["select_mode", "extend_char_left", "surround_add", "insert_mode"]
+
+[keys.select] # some things have to be repeated in select mode (aka visual mode) so you don't have to change your mental map bc you've got something highlighted
+C-c = "yank_to_clipboard"
+A-d = "delete_selection"
+d = "delete_selection_noyank"
+A-c = "change_selection"
+c = "change_selection_noyank"
+p = "replace_with_yanked"
+P = "replace_selections_with_clipboard"
+"(" = "@ms(" # select mode surround shortcuts, VSCode conveniences
+"[" = "@ms["
+"{" = "@ms{"
+'"' = '@ms"'
+"'" = "@ms'"
 ```
 
 <div align="center">
