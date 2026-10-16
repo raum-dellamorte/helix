@@ -1,3 +1,9 @@
+; identifiers
+; -----------
+(identifier) @variable
+((identifier) @variable.builtin (#any-of? @variable.builtin "this" "msg" "block" "tx"))
+(yul_identifier) @variable
+
 ; Pragma
 (pragma_directive) @keyword.directive
 (solidity_version_comparison_operator _ @keyword.directive)
@@ -9,6 +15,7 @@
  (hex_string_literal)
  (unicode_string_literal)
  (yul_string_literal)
+ (yul_hex_string_literal)
 ] @string
 (hex_string_literal "hex" @string.special.symbol)
 (unicode_string_literal "unicode" @string.special.symbol)
@@ -66,6 +73,9 @@
 ; SCREAMING_SNAKE_CASE identifier are constants
 ((identifier) @constant (#match? @constant "^[A-Z][A-Z_]+$"))
 
+; Member access
+(member_expression property: (identifier) @variable.other.member)
+
 ; Invocations
 (emit_statement name: (expression (identifier) @type))
 (revert_statement error: (expression (identifier) @type))
@@ -89,7 +99,6 @@
 )
 
 ; Structs and members
-(member_expression property: (identifier) @variable.other.member)
 (struct_expression type: ((expression (identifier)) @type .))
 (struct_field_assignment name: (identifier) @variable.other.member)
 
@@ -227,14 +236,10 @@
   ">>="
 ] @operator
 
+; The operator symbol in `using {f as +} for T` / user-definable `operator`.
+(user_definable_operator) @operator
+
 [
   "delete"
   "new"
 ] @keyword.operator
-
-; identifiers
-; -----------
-((identifier) @variable.builtin (#any-of? @variable.builtin "this" "msg" "block" "tx"))
-(identifier) @variable
-(yul_identifier) @variable
-
